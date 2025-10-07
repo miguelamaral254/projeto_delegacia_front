@@ -1,6 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import apiClient from '../services/api.service';
 
+const Modal = ({ topic, examples, onClose, loading }) => (
+    <React.Fragment>
+        <style>{`
+            .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+            .modal-content { background: #1e1e1e; padding: 1.5rem 2rem; border-radius: 8px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid #444; position: relative; }
+            .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: #aaa; font-size: 1.5rem; cursor: pointer; }
+            .modal-list { list-style: none; padding: 0; margin-top: 1rem; }
+            .modal-list li { padding: 1rem; border-radius: 6px; background: #2a2a2a; margin-bottom: 1rem; }
+        `}</style>
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <button className="modal-close" onClick={onClose}>&times;</button>
+                <h3 style={{marginTop: 0}}>Exemplos para o Tópico {topic.topic_id + 1}</h3>
+                <p><strong>Palavras-chave:</strong> {topic.keywords.join(', ')}</p>
+                <hr style={{borderColor: '#444'}}/>
+                {loading ? <p>Buscando exemplos...</p> : (
+                    <ul className="modal-list">
+                        {examples.length > 0 ? examples.map(ex => (
+                            <li key={ex.id_ocorrencia}>
+                                <strong>{ex.tipo_crime} (#{ex.id_ocorrencia})</strong>
+                                <p style={{fontSize: '0.9rem', margin: '8px 0', color: '#ccc'}}>{ex.descricao_modus_operandi}</p>
+                            </li>
+                        )) : <p>Nenhum exemplo encontrado.</p>}
+                    </ul>
+                )}
+            </div>
+        </div>
+    </React.Fragment>
+);
+
+
 const LoadingSpinner = () => (
     <React.Fragment>
         <style>{`
@@ -21,12 +52,26 @@ const ModusOperandiTopics = () => {
     const [error, setError] = useState('');
     const [selectedBairro, setSelectedBairro] = useState('');
     const [numTopics, setNumTopics] = useState(5);
+    
+    const [modalData, setModalData] = useState({ isOpen: false, topic: null, examples: [], loading: false });
 
     useEffect(() => {
         apiClient.get('/statistics/unique-bairros')
             .then(res => setBairroOptions(res.data))
             .catch(err => console.error("Falha ao carregar bairros", err));
     }, []);
+
+    const handleTopicClick = async (topic) => {
+        setModalData({ isOpen: true, topic, examples: [], loading: true });
+        try {
+            const payload = { keywords: topic.keywords, bairro: selectedBairro || null };
+            const response = await apiClient.post('/statistics/modus-operandi-examples', payload);
+            setModalData({ isOpen: true, topic, examples: response.data, loading: false });
+        } catch (err) {
+            console.error("Falha ao buscar exemplos", err);
+            setModalData({ isOpen: true, topic, examples: [], loading: false });
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -51,8 +96,10 @@ const ModusOperandiTopics = () => {
 
     return (
         <div style={{ backgroundColor: '#1e1e1e', padding: '2rem', borderRadius: '8px', color: '#f0f0f0' }}>
+            {modalData.isOpen && <Modal {...modalData} onClose={() => setModalData({ isOpen: false, topic: null, examples: [], loading: false })} />}
+
             <h2 style={{ color: '#f9f9f9', marginTop: 0, borderBottom: '1px solid #444', paddingBottom: '1rem' }}>Análise de Tópicos do Modus Operandi</h2>
-            <p style={{ color: '#aaa', fontSize: '0.9rem', maxWidth: '800px' }}>Descubra os padrões textuais recorrentes nas descrições das ocorrências. O algoritmo agrupa palavras que aparecem juntas com frequência para formar "tópicos".</p>
+            <p style={{ color: '#aaa', fontSize: '0.9rem', maxWidth: '800px' }}>Descubra os padrões textuais recorrentes nas descrições das ocorrências. Clique em um tópico para ver exemplos reais.</p>
 
             <form onSubmit={handleSubmit} style={{ marginBottom: '2rem', display: 'flex', alignItems: 'flex-end', gap: '1rem', flexWrap: 'wrap' }}>
                 <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.9rem', color: '#ccc', flexGrow: 1 }}>
@@ -79,7 +126,7 @@ const ModusOperandiTopics = () => {
                     <h3 style={{color: '#f0f0f0'}}>{topicsResult.message}</h3>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginTop: '1.5rem' }}>
                         {topicsResult.topics.map(topic => (
-                            <div key={topic.topic_id} style={{ backgroundColor: '#2a2a2a', padding: '1.5rem', borderRadius: '8px', border: '1px solid #444' }}>
+                            <div key={topic.topic_id} onClick={() => handleTopicClick(topic)} style={{ backgroundColor: '#2a2a2a', padding: '1.5rem', borderRadius: '8px', border: '1px solid #444', cursor: 'pointer', transition: 'transform 0.2s' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.03)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>
                                 <h4 style={{ marginTop: 0, color: '#8884d8' }}>Tópico {topic.topic_id + 1}</h4>
                                 <ul style={{ paddingLeft: '20px', margin: 0 }}>
                                     {topic.keywords.map(word => <li key={word} style={{ marginBottom: '0.5rem' }}>{word}</li>)}

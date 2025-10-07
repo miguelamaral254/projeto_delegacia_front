@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiTarget, FiMap, FiBarChart2, FiCalendar, FiArchive, FiMessageSquare, FiShare2, FiShield, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiTarget, FiMap, FiBarChart2, FiCalendar, FiArchive, FiMessageSquare, FiShare2, FiShield, FiUpload, FiAlertTriangle, FiCpu, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import TopBairrosChart from './components/TopBairrosChart';
 import SeasonalityChart from './components/SeasonalityChart';
 import CrimeHeatmapTable from './components/CrimeHeatmapTable';
@@ -8,6 +8,9 @@ import HotspotPrediction from './components/HotspotPrediction';
 import ModusOperandiTopics from './components/ModusOperandiTopics';
 import SimilarityNetwork from './components/SimilarityNetwork';
 import PatrolSimulation from './components/PatrolSimulation';
+import DatasetManager from './components/DatasetManager';
+import AnomaliesDashboard from './components/AnomaliesDashboard';
+import SupervisedModelDashboard from './components/SupervisedModelDashboard';
 import './App.css';
 
 function App() {
@@ -24,10 +27,13 @@ function App() {
             case 'topics': return <ModusOperandiTopics />;
             case 'network': return <SimilarityNetwork />;
             case 'patrol-simulation': return <PatrolSimulation />;
+            case 'anomalies': return <AnomaliesDashboard />;
+            case 'supervised-model': return <SupervisedModelDashboard />;
             case 'map': return <CrimeMap />;
             case 'top-bairros': return <TopBairrosChart />;
             case 'seasonality': return <SeasonalityChart />;
             case 'heatmap': return <CrimeHeatmapTable />;
+            case 'dataset-manager': return <DatasetManager />;
             default: return <HotspotPrediction />;
         }
     };
@@ -44,7 +50,15 @@ function App() {
                         {isSidebarCollapsed ? <FiChevronRight size={20} /> : <FiChevronLeft size={20} />}
                         <span className="button-text">Recolher</span>
                     </button>
-
+                    
+                    <button onClick={() => setActiveTab('supervised-model')} className={activeTab === 'supervised-model' ? 'active' : ''}>
+                        <FiCpu size={20} />
+                        <span className="button-text">Modelo Supervisionado</span>
+                    </button>
+                    <button onClick={() => setActiveTab('anomalies')} className={activeTab === 'anomalies' ? 'active' : ''}>
+                        <FiAlertTriangle size={20} />
+                        <span className="button-text">Detecção de Anomalias</span>
+                    </button>
                     <button onClick={() => setActiveTab('patrol-simulation')} className={activeTab === 'patrol-simulation' ? 'active' : ''}>
                         <FiShield size={20} />
                         <span className="button-text">Simulação de Patrulha</span>
@@ -76,6 +90,10 @@ function App() {
                     <button onClick={() => setActiveTab('heatmap')} className={activeTab === 'heatmap' ? 'active' : ''}>
                         <FiArchive size={20} />
                         <span className="button-text">Hotspots Históricos</span>
+                    </button>
+                    <button onClick={() => setActiveTab('dataset-manager')} className={activeTab === 'dataset-manager' ? 'active' : ''}>
+                        <FiUpload size={20} />
+                        <span className="button-text">Gerenciar Dataset</span>
                     </button>
                 </nav>
 

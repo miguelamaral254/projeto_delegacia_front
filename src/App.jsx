@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiTarget, FiMap, FiBarChart2, FiCalendar, FiArchive, FiMessageSquare, FiShare2, FiShield, FiUpload, FiAlertTriangle, FiCpu, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiTarget, FiMap, FiBarChart2, FiCalendar, FiArchive, FiMessageSquare, FiShare2, FiShield, FiUpload, FiAlertTriangle, FiCpu, FiPrinter, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import TopBairrosChart from './components/TopBairrosChart';
 import SeasonalityChart from './components/SeasonalityChart';
 import CrimeHeatmapTable from './components/CrimeHeatmapTable';
@@ -11,6 +11,7 @@ import PatrolSimulation from './components/PatrolSimulation';
 import DatasetManager from './components/DatasetManager';
 import AnomaliesDashboard from './components/AnomaliesDashboard';
 import SupervisedModelDashboard from './components/SupervisedModelDashboard';
+import ReportDashboard from './components/ReportDashboard';
 import './App.css';
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
             case 'seasonality': return <SeasonalityChart />;
             case 'heatmap': return <CrimeHeatmapTable />;
             case 'dataset-manager': return <DatasetManager />;
+            case 'report': return <ReportDashboard />;
             default: return <HotspotPrediction />;
         }
     };
@@ -41,7 +43,8 @@ function App() {
     return (
         <div className="App">
             <header className="App-header">
-                <h1>Delegacia 5.0 - Dashboard Preditivo</h1>
+                <h1>Delegacia 5.0 – Plataforma de
+                Análise Preditiva de Crimes</h1>
             </header>
 
             <div className={`App-body ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
@@ -94,6 +97,10 @@ function App() {
                     <button onClick={() => setActiveTab('dataset-manager')} className={activeTab === 'dataset-manager' ? 'active' : ''}>
                         <FiUpload size={20} />
                         <span className="button-text">Gerenciar Dataset</span>
+                    </button>
+                    <button onClick={() => setActiveTab('report')} className={activeTab === 'report' ? 'active' : ''}>
+                        <FiPrinter size={20} />
+                        <span className="button-text">Relatório Geral</span>
                     </button>
                 </nav>
 

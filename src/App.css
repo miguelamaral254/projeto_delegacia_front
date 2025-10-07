@@ -12,8 +12,8 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--background-color);
@@ -21,29 +21,97 @@ body {
 }
 
 .App {
-  text-align: center;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
 }
 
 .App-header {
   background-color: var(--card-background);
-  padding: 20px;
   border-bottom: 1px solid var(--border-color);
+  text-align: center;
+  flex-shrink: 0;
 }
 
-.App-nav {
+.App-body {
   display: flex;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.App-sidebar {
+  width: 240px;
+  background-color: var(--card-background);
+  border-right: 1px solid var(--border-color);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: width 0.3s ease;
+}
+
+.App-sidebar button {
+  background: none;
+  border: none;
+  color: var(--secondary-text-color);
+  padding: 15px;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-bottom: 8px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.App-sidebar button:hover {
+  background-color: var(--accent-hover);
+  color: var(--primary-text-color);
+}
+
+.App-sidebar button.active {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.sidebar-toggle {
+  margin-bottom: 1rem;
   justify-content: center;
-  background-color: var(--background-color);
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border-color);
+  background-color: transparent !important;
+}
+
+.sidebar-toggle:hover {
+  background-color: var(--border-color) !important;
+}
+
+.button-text {
+  transition: opacity 0.2s ease;
+}
+
+.sidebar-collapsed .App-sidebar {
+  width: 60px;
+  padding: 1rem 0.5rem;
+}
+
+.sidebar-collapsed .button-text {
+  opacity: 0;
+  width: 0;
+  pointer-events: none;
+}
+
+.sidebar-collapsed .App-sidebar button {
+  justify-content: center;
 }
 
 .App-content {
-  padding: 2rem;
+  padding: 1rem;
   flex-grow: 1;
+  overflow-y: auto;
 }
 
 .component-container {
@@ -63,6 +131,7 @@ body {
 .loading {
   font-size: 1.2rem;
   padding: 2rem;
+  text-align: center;
 }
 
 button {
@@ -86,21 +155,6 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.App-nav button {
-  background: none;
-  border: 2px solid transparent;
-  padding: 8px 16px;
-  margin: 0 5px;
-  color: var(--secondary-text-color);
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
-}
-
-.App-nav button.active {
-  color: var(--accent-color);
-  border-bottom: 2px solid var(--accent-color);
-}
-
 .filters {
   margin-bottom: 1.5rem;
   display: flex;
@@ -115,26 +169,26 @@ button:disabled {
 }
 
 .filters button.active {
-    background-color: var(--accent-color);
-    color: white;
+  background-color: var(--accent-color);
+  color: white;
 }
 
 .filters-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .chart-container {
-    width: 100%;
-    height: 400px;
-    margin-bottom: 2rem;
+  width: 100%;
+  height: 400px;
+  margin-bottom: 2rem;
 }
 
 .chart-container h4 {
-    margin-bottom: 1rem;
-    color: var(--secondary-text-color);
+  margin-bottom: 1rem;
+  color: var(--secondary-text-color);
 }
 
 .prediction-form {
@@ -172,6 +226,7 @@ input, select {
   background-color: var(--background-color);
   border-radius: 8px;
   border: 1px solid var(--border-color);
+  text-align: center;
 }
 
 .prediction-value {
@@ -187,29 +242,29 @@ input, select {
 }
 
 .table-container {
-    max-height: 400px;
-    overflow-y: auto;
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
 }
 table {
-    width: 100%;
-    border-collapse: collapse;
+  width: 100%;
+  border-collapse: collapse;
 }
 th, td {
-    padding: 12px 15px;
-    text-align: left;
+  padding: 12px 15px;
+  text-align: left;
 }
 thead tr {
-    background-color: #333;
-    position: sticky;
-    top: 0;
+  background-color: #333;
+  position: sticky;
+  top: 0;
 }
 tbody tr:nth-child(even) {
-    background-color: #2e2e2e;
+  background-color: #2e2e2e;
 }
 tbody tr:hover {
-    background-color: #3f3f3f;
+  background-color: #3f3f3f;
 }
 
 .map-view-layout {

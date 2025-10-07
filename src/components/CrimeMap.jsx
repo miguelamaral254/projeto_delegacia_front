@@ -1,32 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet.heat';
 import apiClient from '../services/api.service';
 
-// Componente auxiliar para ajustar os limites do mapa
 const FitBounds = ({ points }) => {
     const map = useMap();
     useEffect(() => {
         if (points && points.length > 0) {
-            const bounds = points.map(p => [p.latitude, p.longitude]);
-            map.fitBounds(bounds, { padding: [50, 50] });
+            const latLngs = points.map(p => [p.latitude, p.longitude]);
+            map.fitBounds(latLngs, { padding: [50, 50] });
         }
     }, [points, map]);
     return null;
 };
 
+const HeatmapLayer = ({ points }) => {
+    const map = useMap();
+    const heatLayerRef = React.useRef(null);
+
+    useEffect(() => {
+        if (!map) return;
+        const heatData = points.map(p => [p.latitude, p.longitude, 0.5]);
+
+        if (heatLayerRef.current) {
+            heatLayerRef.current.setLatLngs(heatData);
+        } else {
+            heatLayerRef.current = L.heatLayer(heatData, {
+                radius: 25,    
+                blur: 15,       
+                maxZoom: 17,    
+                minOpacity: 0.5 
+            }).addTo(map);
+        }
+        return () => {
+            if (map && heatLayerRef.current) {
+                map.removeLayer(heatLayerRef.current);
+                heatLayerRef.current = null;
+            }
+        };
+    }, [points, map]); 
+
+    return null;
+};
+
+
 const CrimeMap = () => {
     const [occurrences, setOccurrences] = useState([]);
     const [loading, setLoading] = useState(true);
-    
     const [bairroOptions, setBairroOptions] = useState([]);
     const [crimeTypeOptions, setCrimeTypeOptions] = useState([]);
-    
     const [bairroFilter, setBairroFilter] = useState('');
     const [crimeTypeFilter, setCrimeTypeFilter] = useState('');
-    
-    const mapPosition = [-8.0578, -34.8829]; // Centro de Recife
+    const mapPosition = [-8.0578, -34.8829]; 
 
-    // Busca as opções dos filtros
     useEffect(() => {
         Promise.all([
             apiClient.get('/statistics/unique-bairros'),
@@ -37,7 +64,6 @@ const CrimeMap = () => {
         }).catch(err => console.error("Falha ao carregar opções de filtro", err));
     }, []);
 
-    // Busca as ocorrências quando um filtro muda
     useEffect(() => {
         setLoading(true);
         const params = {};
@@ -99,18 +125,7 @@ const CrimeMap = () => {
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     />
-                    {occurrences.map(occ => (
-                        <Marker key={occ.id_ocorrencia} position={[occ.latitude, occ.longitude]}>
-                            <Popup>
-                                <b>{occ.tipo_crime}</b><br />
-                                Bairro: {occ.bairro}<br />
-                                Data: {new Date(occ.data_ocorrencia).toLocaleDateString()}<br/>
-                                {/* --- MUDANÇA AQUI --- */}
-                                Lat: {occ.latitude}<br/>
-                                Lon: {occ.longitude}
-                            </Popup>
-                        </Marker>
-                    ))}
+                    <HeatmapLayer points={occurrences} />
                     <FitBounds points={occurrences} />
                 </MapContainer>
             </div>
